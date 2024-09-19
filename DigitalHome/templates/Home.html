@@ -1,0 +1,77 @@
+{% extends 'master.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+	{% block css %}
+<style>
+
+    .button {
+	pointer-events: auto;
+	cursor: pointer;
+	background: #BDE8CA;
+	border: none;
+	padding: 1.5rem 3rem;
+	margin: 0;
+	position: relative;
+	display: inline-block;
+}
+.button::before,
+.button::after {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.button--pan {
+	font-family: aktiv-grotesk-extended, sans-serif;
+	font-weight: 700;
+	border: 2px solid #000;
+	border-radius: 3rem;
+	overflow: hidden;
+	color: #0D7C66;
+}
+
+.button--pan span {
+	position: relative;
+	mix-blend-mode: difference;
+}
+
+.button--pan::before {
+	
+    color:#D7C3F1;
+	background: #0D7C66;
+	transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.button--pan:hover::before {
+	transform: translate3d(0,-100%,0);
+}
+
+</style>
+{% endblock %}
+
+<!--
+0D7C66 -dark green
+41B3A2 - light green
+BDE8CA - lighter green
+D7C3F1 - Violet
+-->
+</head>
+
+<body>
+	{% block content %}
+	<div class="center">
+	
+<a href="{% url 'inputprompt' %}">
+    <button class="button button--pan">Start the Quiz Now</button>
+</a>
+</div>
+
+
+
+
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+{% extends 'inputprompt.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+	{% block css %}
+<style>
+
+.textinput {
+    display: inline-block;
+    padding: 0 16px 0 12px;
+    width: 50%;
+    line-height: 30px;
+    height: 50px; 
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #0D7C66;
+    transition: border 0.1s linear, background-color 0.1s linear;
+}
+
+.textinput:focus {
+    border-color: #0D7C66;
+    color: var(--sds-c-input-text-color-focus);
+    box-shadow: #0D7C66 0px 0px 3px 0px;
+}
+
+</style>
+{% endblock %}
+
+<!--
+0D7C66 -dark green
+41B3A2 - light green
+BDE8CA - lighter green
+D7C3F1 - Violet
+-->
+</head>
+
+<body onload = "hidefunction()">
+	{% block content %}
+
+<div class="center">
+
+<div id="summary"  style="display:block">
+{% if summarization %}
+<h2>Summarization:</h2>
+<p>{{ summarization }}</p>
+{% else %}
+<p>No summarization available.</p>
+{% endif %}
+</div>
+<!-------------- to be deleted--------------->
+<div id="explain" style="display:none">
+{% if error %}
+<h2>Explanation:</h2>
+<p>{{ error}}</p>
+{% else %}
+<p>No Explanation Found.</p>
+{% endif %}
+</div>
+
+
+
+<div id="llm"  style="display:block">
+{% if llm_response %}
+<h2>llm_response:</h2>
+<p>{{ llm_response}}</p>
+{% else %}
+<p>No llm_response Found.</p>
+{% endif %}
+</div>
+
+
+<!-------------- Delete end--------------->
+</div>
+<br><br>
+<div>
+    <div class="center">
+
+        <form name="inputgiven" class="center" method="post" action="{% url 'inputis' %}">
+            <input class="textinput" type="text" id="prompt" name="prompt" placeholder="Describe your device" required/>
+            <br>
+            <button  class="button button--pan" type="submit">Submit</button>
+        </form>
+        
+        </div>
+</div>
+
+{% endblock %}
+
+</body>
+
+{% block script %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    
+$(document).ready(function() {
+    var summarization = "{{ summarization|escapejs }}";
+    var explain = "{{ error|escapejs }}";
+    if(summarization){
+        document.getElementById("summary").style.display = "block";
+        document.getElementById("explain").style.display = "none";
+    }else if(explain){
+        document.getElementById("summary").style.display = "none";
+        document.getElementById("explain").style.display = "block";
+    }
+        });
+</script>
+{% endblock %}
+
+</html>
+
+

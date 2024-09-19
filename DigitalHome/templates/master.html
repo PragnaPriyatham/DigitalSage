@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css\fontawesome.min.css' %}">
+    <script src="https://kit.fontawesome.com/0062426fab.js" crossorigin="anonymous"></script>
+<style>
+    #maintitle{
+        text-align:center;
+        margin:auto;
+        background-color: #BDE8CA;
+        padding:100px;
+        color:#0D7C66;
+    }
+    #mainheader:hover{
+        text-decoration:underline;
+    }
+    .center{
+        text-align:center;
+    }
+    .textgreen{
+        color:#0D7C66;
+    }
+ 
+
+    .button {
+	pointer-events: auto;
+	cursor: pointer;
+	background: #BDE8CA;
+	border: none;
+	padding: 1.5rem 3rem;
+	margin: 0;
+	position: relative;
+	display: inline-block;
+}
+.button::before,
+.button::after {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.button--pan {
+	font-family: aktiv-grotesk-extended, sans-serif;
+	font-weight: 700;
+	border: 2px solid #000;
+	border-radius: 3rem;
+	overflow: hidden;
+	color: #0D7C66;
+}
+
+.button--pan span {
+	position: relative;
+	mix-blend-mode: difference;
+}
+
+.button--pan::before {
+	
+    color:#D7C3F1;
+	background: #0D7C66;
+	transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.button--pan:hover::before {
+	transform: translate3d(0,-100%,0);
+}
+.iconchange{
+    color: #0D7C66;
+    font-size:20px;
+}
+.iconchange:hover{
+    color: #0D7C66;
+    text-decoration: underline;
+    text-decoration-color: #D7C3F1;  /* Color of the underline */
+    text-decoration-thickness: 2px;  /* Thickness of the underline (optional) */
+    font-size:25px;
+}
+
+
+
+.button {
+pointer-events: auto;
+cursor: pointer;
+background: #BDE8CA;
+border: none;
+padding: 1.5rem 3rem;
+margin: 0;
+position: relative;
+display: inline-block;
+}
+.button::before,
+.button::after {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+}
+.button--pan {
+font-family: aktiv-grotesk-extended, sans-serif;
+font-weight: 700;
+border: 2px solid #000;
+border-radius: 3rem;
+overflow: hidden;
+color: #0D7C66;
+}
+
+.button--pan span {
+position: relative;
+mix-blend-mode: difference;
+}
+
+.button--pan::before {
+
+color:#D7C3F1;
+background: #0D7C66;
+transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+.button--pan:hover::before {
+transform: translate3d(0,-100%,0);
+}
+
+</style>
+
+{% block css %}
+
+{% endblock %}
+
+<!--
+0D7C66 -dark green
+41B3A2 - light green
+BDE8CA - lighter green
+D7C3F1 - Violet
+-->
+</head>
+<body>
+<title>DeviceSage </title>
+<div id="maintitle">
+    <a href="{% url 'DigitalHome' %}" ><i class="fa fa-house iconchange"></i></a>
+    <h1 id="mainheader">DeviceSage  </h1>
+    <h2>Explore Your Ideal Device</h2>
+</div>
+<br><br>
+<div class="center textgreen">
+
+<p>Struggling to find the right gadget? We're here to help. Whether you're looking for a smartphone, laptop, or tablet, we analyze your preferences to recommend the perfect device</p>
+<p>Answer a Few Questions, Get the Best Device Recommendations!</p>
+
+</div>
+<br><br><br>
+<div>
+    {% block content %}
+  
+    {% endblock %}  
+</div>
+</body>
+
+
+
+{% block script %}
+
+{% endblock %}  
+</html>
