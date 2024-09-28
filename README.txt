@@ -1,4 +1,4 @@
-Laptop Recommendation System
+ctLaptop Recommendation System
 Overview
 This project is a web-based application designed to recommend laptops based on user preferences, including price, brand, and performance. It utilizes Python's Django framework and MySQL as the database.
 
@@ -9,7 +9,7 @@ Admin panel for managing laptop database entries.
 Technologies Used
 Backend: Python (Django)
 Database: MySQL
-Frontend: HTML, CSS, JavaScript
+Frontend: HTML, CSS, JavaScript,React
 APIs: RESTful API for device data handling
 Version Control: Git
 Installation
