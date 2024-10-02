@@ -15,7 +15,7 @@ const DeviceList = () => {
   return (
     <div>
       <h1>Device List</h1>
-      {/* Display fetched data */}
+      {/* Display fetched data */}git 
       <ul>
         {devices.map((device) => (
           <li key={device.laptop_id}>
