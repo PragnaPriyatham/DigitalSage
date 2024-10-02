@@ -77,8 +77,8 @@ D7C3F1 - Violet
     <div class="center">
 
         <form name="inputgiven" class="center" method="post" action="{% url 'inputis' %}">
-            <input class="textinput" type="text" id="prompt" name="prompt" placeholder="Describe your device" required/>
-            <br>
+            <textarea class="textinput" type="text" id="prompt" name="prompt" placeholder="Get your advice" required></textarea>
+            <br><br><br>
             <button  class="button button--pan" type="submit">Submit</button>
         </form>
         
@@ -107,6 +107,8 @@ $(document).ready(function() {
         });
 </script>
 {% endblock %}
+
+
 
 </html>
 
