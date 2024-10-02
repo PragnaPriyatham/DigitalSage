@@ -1,0 +1,8 @@
+djangorestframework - pip install djangorestframework
+mysqlclient - pip install mysqlclient
+
+
+Add Tailwind CSS
+npm install tailwindcss-animate class-variance-authority clsx tailwind-merge
+npm install lucide-react
+npm install @radix-ui/react-icons

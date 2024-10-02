@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
-
+from dotenv import load_dotenv 
 from django.http import JsonResponse
 
 import os
@@ -15,8 +15,14 @@ import json
 import re
 
 
+
+from rest_framework import generics
+from .models import laptops
+from .serializers import DeviceSerializer
+
+load_dotenv()
 #API used################
-os.environ['GROQ_API_KEY'] = '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'
+#os.environ['GROQ_API_KEY'] = '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'
 
 import logging
 
@@ -32,14 +38,14 @@ def inputprompt(request):
     template = loader.get_template('inputprompt.html')
     return HttpResponse(template.render())
 
-
 @csrf_exempt
 def inputis(request):
     if request.method == 'POST':
-        prompt = request.POST.get('prompt')
-        context = {
-        'prompt': prompt, 
-        }
+            data = json.loads(request.body)
+            prompt = data.get('prompt', '')
+            context = {
+                'prompt': prompt,
+            }
 
 
     # Use the Llama3 70b model
@@ -73,23 +79,14 @@ def inputis(request):
 
                 formatted_sql_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
 
-
-
                 summarization = get_summarization(client,user_question,results_df,model)
                 context['summarization'] = summarization
         elif 'error' in result_json:
                 context['error'] = result_json['error']
 
-    template = loader.get_template('suggest.html')    
-    return HttpResponse(template.render(context,request))
-
-
-
-
-
-
-
-
+    #template = loader.get_template('suggest.html')    
+    #return HttpResponse(template.render(context,request))
+    return JsonResponse(context)  
 
 
 
@@ -176,8 +173,7 @@ def get_summarization(client, user_question, df, model):
     # Response format is set to 'None'
     return chat_with_groq(client,prompt,model,None)
 
+class DeviceList(generics.ListCreateAPIView):
+    queryset = laptops.objects.all()  # Fetch all rows from the SQL table
+    serializer_class = DeviceSerializer  # Specify the serializer class
 
-
-
-
-        

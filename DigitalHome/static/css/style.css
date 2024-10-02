@@ -1,0 +1,173 @@
+#maintitle{
+    text-align:center;
+    margin:auto;
+    color:black;
+}
+#mainheader{
+    font-size:25px;
+}
+#mainheader:hover{
+    text-decoration:underline;
+}
+.center{
+    text-align:center;
+}
+.textgreen{
+    color:#0D7C66;
+}
+/* Ensures the body takes the full height */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.content-wrapper {
+    min-height: 8%; /* Makes the content wrapper span the entire height */
+    position: relative; /* Position relative for absolute positioning of the footer */
+    padding-bottom: 20px; /* Space for the footer */
+}
+
+/* Main content styling */
+.main-content {
+    padding: 20px;
+}
+
+/* Footer fixed to the bottom of the viewport */
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    text-align: center;
+}
+
+
+
+
+
+
+/* Common typewriter styling */
+.typewriter p {
+    overflow: hidden; /* Ensures the content is not revealed until the animation */
+    border-right: .15em solid orange; /* The typewriter cursor */
+    white-space: nowrap; /* Keeps the content on a single line */
+    margin: 0 auto; /* Centers the text */
+    letter-spacing: .15em; /* Adds spacing between letters */
+}
+
+/* First line animation */
+.line1 {
+    animation: typing1 3.5s steps(40, end), blink-caret .75s step-end infinite;
+}
+
+/* Second line animation with delay */
+.line2 {
+    animation: typing2 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    animation-delay: 3.5s; /* Delay the second animation to match the duration of the first */
+   
+}
+
+.line2 {
+    animation-fill-mode: forwards; /* Keeps the animation state after completion */
+}
+
+/* The typing effect for both lines */
+@keyframes typing1 {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes typing2 {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: orange; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.iconchange{
+color: Black;
+font-size:20px;
+}
+.iconchange:hover{
+color: #0D7C66;
+text-decoration: underline;
+text-decoration-color: #D7C3F1;  /* Color of the underline */
+text-decoration-thickness: 2px;  /* Thickness of the underline (optional) */
+}
+
+
+
+.button {
+pointer-events: auto;
+cursor: pointer;
+background: Black;
+color:#eae8e0;
+border: none;
+padding: 1.5rem 3rem;
+margin: 0;
+position: relative;
+display: inline-block;
+border-radius:25px;
+border : 2px solid Black;
+}
+
+.button:hover{
+border : 2px solid Black;
+background: #eae8e0;
+color:Black;
+}
+
+
+.font{
+    font-size: 30px;
+}
+.container {
+    display: flex;
+    justify-content: space-between; /* Space between the two divs */
+    align-items: center; /* Align items vertically center */
+    padding: 20px; /* Add some padding for layout space */
+    gap: 20px; /* Space between divs */
+}
+
+/* Styling for the left text content */
+.text-content {
+    flex: 1; /* Take up available space */
+    max-width: 50%; /* Prevent it from taking too much space */
+}
+
+/* Styling for the right image content */
+.image-content {
+    flex: 1; /* Take up available space */
+    max-width: 50%; /* Prevent it from taking too much space */
+}
+
+/* Ensure the image scales properly */
+.image-content img {
+    max-width: 50%;
+    height: auto; /* Keep the image ratio intact */
+}
+
+
+
+.textinput{
+    border-radius: 20px;
+}
