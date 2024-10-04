@@ -1,34 +1,25 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from dotenv import load_dotenv 
-from django.http import JsonResponse
 
 import os
-from groq import Groq
-import sqlparse
-import numpy as np
-import pandas as pd
-import mysql.connector
 import json
 import re
-
-
-
+import sqlparse
+import pandas as pd
+import mysql.connector
+from groq import Groq
 from rest_framework import generics
 from .models import laptops
 from .serializers import DeviceSerializer
 
 load_dotenv()
-#API used################
-#os.environ['GROQ_API_KEY'] = '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'
 
+# Setup logging
 import logging
-
 logger = logging.getLogger(__name__)
-
-
 
 def home(request):
     template = loader.get_template('home.html')
@@ -37,143 +28,140 @@ def home(request):
 def inputprompt(request):
     template = loader.get_template('inputprompt.html')
     return HttpResponse(template.render())
-
 @csrf_exempt
 def inputis(request):
     if request.method == 'POST':
-            data = json.loads(request.body)
-            prompt = data.get('prompt', '')
-            context = {
-                'prompt': prompt,
-            }
+        
+            # Handle different content types
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            elif request.content_type == 'application/x-www-form-urlencoded':
+                data = request.POST  # Django automatically parses form-encoded data
+            else:
+                return JsonResponse({"error": "Unsupported content type"}, status=400)
+
+            prompt = data.get('prompt', '').strip()  # Use .strip() to remove leading/trailing spaces and line breaks
+            if not prompt:
+                return JsonResponse({"error": "Prompt not provided"}, status=400)
+
+            # Continue processing...
+            # Example: Use the sanitized prompt for your logic here
+            context = {'prompt': prompt}
+
+            # Step 1: Retrieve relevant data from the database (retriever step)
+            relevant_data = retrieve_device_data(prompt)
+            if relevant_data is not None:
+                summarization = generate_rag_response(prompt, relevant_data)
+                context['summarization'] = summarization
+            else:
+                context['error'] = "No relevant data found."
+            return JsonResponse(context)
 
 
-    # Use the Llama3 70b model
-    model = "llama3-70b-8192"
-    #model = "gemma2-9b-it"
 
-    # Get the Groq API key and create a Groq client
+# Retriever function - retrieves data from MySQL database based on user input
+def retrieve_device_data(user_question):
+    # Set up Groq client
     groq_api_key = os.getenv('GROQ_API_KEY')
-    client = Groq(
-    api_key=groq_api_key
-    )
-    # Load the base prompt
+    client = Groq(api_key=groq_api_key)
+
+    # Define the model to use
+    model = "llama3-70b-8192"
     with open('DigitalHome/prompts/base_prompt.txt', 'r') as file:
         base_prompt = file.read()
-
-
-    user_question = prompt
     if user_question:
         # Generate the full prompt for the AI
         full_prompt = base_prompt.format(user_question=user_question)
 
-        # Get the AI's response as text output
-        llm_response = chat_with_groq(client, full_prompt, model,{"type": "json_object"})
-        context['llm_response'] = llm_response
-        json_part = re.search(r'(\{.*\})', llm_response)
-        json_str = json_part.group(0) 
-        result_json = json.loads(json_str)
-        if 'sql' in result_json:
-                sql_query = result_json['sql']
-                results_df = execute_mysql_query(sql_query)
-
-                formatted_sql_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
-
-                summarization = get_summarization(client,user_question,results_df,model)
-                context['summarization'] = summarization
-        elif 'error' in result_json:
-                context['error'] = result_json['error']
-
-    #template = loader.get_template('suggest.html')    
-    #return HttpResponse(template.render(context,request))
-    return JsonResponse(context)  
+    # Get the SQL query or error from Groq
+    llm_response = chat_with_groq(client, full_prompt, model,{"type": "json_object"})
+    result_json = extract_sql_from_llm_response(llm_response)
+    print("$$$$$$$$$$$$"+llm_response)
+    if 'sql' in result_json:
+        sql_query = result_json['sql']
+        sql_query = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+        return execute_mysql_query(sql_query)
+    elif 'error' in result_json:
+        return None
 
 
+# Generator function - generates a natural language response based on retrieved data
+def generate_rag_response(user_input, data):
+    # Load the Groq API key and create a Groq client
+    groq_api_key = os.getenv('GROQ_API_KEY')
+    client = Groq(api_key=groq_api_key)
+    model = "llama3-70b-8192"  # Generative model used
 
-#######################
-def chat_with_groq(client, prompt, model,response_format):
+    # Create a prompt for the summarization
+    prompt = f'''
+        A user asked: "{user_input}"
+
+        Here are some relevant laptops we found:
+        {data.to_string(index=False)}
+
+        Can you provide a personalized recommendation based on the data above?
+    '''
+
+    # Generate the natural language response
+    llm_response = chat_with_groq(client, prompt, model, {"type": "json_object"})
+    return llm_response
+
+def chat_with_groq(client, prompt, model, response_format):
     completion = client.chat.completions.create(
         model=model,
-        messages=[
-              {
-                  "role": "user",
-                  "content": prompt
-              }
-          ],
-        )
-    response_format=response_format
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }]
+    )
     return completion.choices[0].message.content
-
-
 
 def execute_mysql_query(query):
     conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="admin@123",
-            database="device"
-        )
-    
+        host="localhost",
+        user="root",
+        password="admin@123",
+        database="device"
+    )
     try:
-        # Execute the query and fetch the results
-        cursor = conn.cursor(dictionary=True)  # Use dictionary=True to get results as dicts
+        cursor = conn.cursor(dictionary=True)
         cursor.execute(query)
         query_result = cursor.fetchall()
-
-        # Convert query result to a pandas DataFrame
         results_df = pd.DataFrame(query_result)
     finally:
-        # Close the connection
         cursor.close()
         conn.close()
-
     return results_df
 
 
 
-def remove_prefix(text):
-        print(text)
-        if '{"sql":' in text:
-            i=text.index(':')
-            text=text[i+1:]
+def extract_sql_from_llm_response(llm_response):
+    # Regular expression to match JSON-like structures
+    json_pattern = r'\{[^{}]*\}'  # Match the first JSON-like structure
+    match = re.search(json_pattern, llm_response, re.DOTALL)
+
+    if match:
+        json_part = match.group(0)  # Extract the matched JSON
+        
+        # Normalize the SQL string within the JSON
+        try:
+            # Replace newline characters and extra spaces in the SQL string
+            json_part = json_part.replace('\n', ' ').replace('  ', ' ').strip()
             
-        elif '{"error":' in text:
-            text=text.replace('{"error":','')
-        text=text.replace('}','')
-        return text
-
-
-def get_summarization(client, user_question, df, model):
-    """
-    This function generates a summarization prompt based on the user's question and the resulting data. 
-    It then sends this summarization prompt to the Groq API and retrieves the AI's response.
-
-    Parameters:
-    client (Groqcloud): The Groq API client.
-    user_question (str): The user's question.
-    df (DataFrame): The DataFrame resulting from the SQL query.
-    model (str): The AI model to use for the response.
-
-    Returns:
-    str: The content of the AI's response to the summarization prompt.
-    """
-    prompt = '''
-      A user asked the following question pertaining to local database tables:
-    
-      {user_question}
-    
-      To answer the question, a dataframe was returned:
-    
-      Dataframe:
-      {df}
-
-    In a few sentences, summarize the data in the table as it pertains to the original user question. Avoid qualifiers like "based on the data" and do not comment on the structure or metadata of the table itself
-  '''.format(user_question = user_question, df = df)
-
-    # Response format is set to 'None'
-    return chat_with_groq(client,prompt,model,None)
+            # Ensure double quotes for JSON compatibility
+            json_part = re.sub(r'(["\'])(.*?)\1', r'"\2"', json_part)  # Normalize quotes
+            
+            # Load the JSON string
+            result_json = json.loads(json_part)
+            return result_json
+        
+        except json.JSONDecodeError as e:
+            print("Error decoding JSON:", e)
+            return None
+    else:
+        print("No valid JSON found in the response.")
+        return None
 
 class DeviceList(generics.ListCreateAPIView):
-    queryset = laptops.objects.all()  # Fetch all rows from the SQL table
-    serializer_class = DeviceSerializer  # Specify the serializer class
-
+    queryset = laptops.objects.all()
+    serializer_class = DeviceSerializer

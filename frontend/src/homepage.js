@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, Send } from 'lucide-react';
 
 const AnimatedBackground = () => (
@@ -39,11 +39,17 @@ const HomePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [question, setQuestion] = useState('');
   const [chatHistory, setChatHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const chatRef = useRef(null); // Reference for the chat container
 
   const handleQuestionSubmit = async (e) => {
     e.preventDefault();
     const data = { prompt: question };
     setChatHistory((prev) => [...prev, { role: 'user', text: question }]);
+    setQuestion('');
+    setLoading(true);
+    setError('');
 
     try {
       const response = await fetch('http://localhost:8000/device/inputis', {
@@ -55,12 +61,26 @@ const HomePage = () => {
       if (!response.ok) throw new Error('Network response was not ok');
       const result = await response.json();
       const responseText = result.error ? result.error : result.summarization;
-      setChatHistory((prev) => [...prev, { role: 'deviceSage', text: responseText }]);
-      setQuestion('');
+
+      // Add the device's response to the chat history
+      setChatHistory((prev) => [
+        ...prev,
+        { role: 'deviceSage', text: responseText },
+      ]);
     } catch (error) {
+      setError('Error sending data. Please try again.');
       console.error('Error sending data:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Scroll to the bottom of the chat whenever chatHistory changes
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden font-sans">
@@ -83,15 +103,28 @@ const HomePage = () => {
         </header>
 
         <main className="flex-grow container mx-auto py-12 px-4 flex flex-col max-w-5xl">
-          <div className="flex flex-col space-y-4 mb-4 flex-grow scrollable max-h-[80vh]"> {/* Added scrollable class */}
+          <div
+            ref={chatRef}
+            className="flex flex-col space-y-4 mb-4 flex-grow scrollable max-h-[80vh] overflow-y-auto"
+          >
             {chatHistory.map((chat, index) => (
-              <div key={index} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`rounded-lg p-3 max-w-md ${chat.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'}`}>
+              <div
+                key={index}
+                className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`rounded-lg p-3 max-w-md ${
+                    chat.role === 'user' ? 'bg-gray-500 text-white' : 'bg-gray-300 text-black'
+                  }`}
+                >
                   <p>{chat.text}</p>
                 </div>
               </div>
             ))}
           </div>
+
+          {error && <p className="text-red-500">{error}</p>}
+          {loading && <p className="text-white">Loading...</p>}
 
           <form onSubmit={handleQuestionSubmit} className="mb-8">
             <div className="flex justify-center">
@@ -104,7 +137,10 @@ const HomePage = () => {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
               />
-              <button type="submit" className="border border-white to-gray-800 text-white py-3 px-6 rounded-r-lg hover:to-gray-600 transition-colors duration-300">
+              <button
+                type="submit"
+                className="border border-white to-gray-800 text-white py-3 px-6 rounded-r-lg hover:to-gray-600 transition-colors duration-300"
+              >
                 <Send size={20} />
               </button>
             </div>
